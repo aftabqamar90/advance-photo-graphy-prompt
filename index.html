@@ -99,7 +99,7 @@
   <section class="space-y-5">
     <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
       <p class="text-xs font-bold uppercase tracking-[.18em] text-violet-600">3. Change Parameters</p>
-      <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Every dropdown defaults to “Keep Original.”</p>
+      <div class="flex items-center justify-between gap-3"><p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Every dropdown includes “Keep Original” and “Custom.”</p><button id="openGuideBtn" class="rounded-xl border border-violet-300 px-3 py-2 text-sm font-semibold text-violet-700 dark:border-violet-800 dark:text-violet-300">Open Full Guide</button></div>
       <div id="parameterGrid" class="mt-5 grid gap-4 md:grid-cols-2">
         <!-- injected -->
       </div>
@@ -193,6 +193,16 @@
   </aside>
 </main>
 
+
+<div id="guideModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 p-4">
+  <div class="max-h-[88vh] w-full max-w-4xl overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-slate-900">
+    <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4 dark:border-slate-800">
+      <div><h2 id="modalTitle" class="text-xl font-bold">Feature Guide</h2><p id="modalSubtitle" class="text-sm text-slate-500 dark:text-slate-400">Descriptions for available options</p></div>
+      <button id="closeGuideBtn" class="rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold dark:border-slate-700">Close</button>
+    </div>
+    <div id="modalContent" class="max-h-[70vh] overflow-y-auto p-6"></div>
+  </div>
+</div>
 <div id="toast" class="fixed bottom-5 right-5 translate-y-3 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white opacity-0 shadow-xl transition dark:bg-white dark:text-slate-900">Prompt copied</div>
 
 <script>
@@ -202,40 +212,77 @@
     ["Expression","🙂"],["Accessories","⌚"],["Body","💪"],["Other Details","⚙️"]
   ];
 
-  const schemas = {
+  const optionDescriptions = {
+  "Keep Original":"Leaves this feature exactly as it appears in the uploaded image.",
+  "Custom":"Opens a text box so the user can write an exact instruction.",
+  "Eye Level":"Natural camera height, balanced and realistic.",
+  "Low Angle":"Camera looks upward, making the subject appear stronger.",
+  "High Angle":"Camera looks downward, creating a softer perspective.",
+  "Close-up":"Frames mainly the face and shoulders.",
+  "Half Body":"Shows the subject from waist or chest upward.",
+  "Full Body":"Shows the complete person from head to toe.",
+  "Wide Shot":"Includes more of the surrounding environment.",
+  "35mm":"Wider view suitable for lifestyle and environmental scenes.",
+  "50mm":"Natural perspective close to human vision.",
+  "85mm Portrait Lens":"Flattering portrait compression with background separation.",
+  "Soft Natural Light":"Gentle realistic daylight with soft shadows.",
+  "Golden Hour":"Warm sunlight near sunrise or sunset.",
+  "Studio Lighting":"Controlled professional light with clean results.",
+  "Cinematic Lighting":"Dramatic movie-like highlights and shadows."
+};
+const helpText = {
+  "Hair style":"Changes only the visible hairstyle while preserving identity.",
+  "Hair color":"Changes hair color without changing the face or age.",
+  "Glasses style":"Selects the shape or type of glasses.",
+  "Glasses color":"Controls the frame color.",
+  "Shirt style":"Selects the upper-body clothing type.",
+  "Shirt color":"Controls the main shirt color.",
+  "Shirt logo":"Adds, removes, or preserves the shirt logo.",
+  "Pants style":"Selects the lower-body clothing type.",
+  "Pants color":"Controls the pants color.",
+  "Pants logo":"Adds, removes, or preserves pants branding.",
+  "Belt color":"Controls the visible belt color.",
+  "Shoes color":"Controls the main footwear color.",
+  "Camera angle":"Controls where the camera is positioned relative to the person.",
+  "Lens":"Controls perspective, framing, and background compression.",
+  "Lighting":"Controls how the person and scene are illuminated.",
+  "Photography style":"Controls the overall photographic look."
+};
+function addCustom(options){ return options.includes("Custom") ? options : [...options, "Custom"]; }
+const schemas = {
     "Hair": {
-      "Hair style":["Keep Original","Short","Medium","Long","Fade","Curly","Straight","Wavy","Slick Back"],
-      "Hair color":["Keep Original","Black","Dark Brown","Brown","Blonde","Grey","Custom"],
+      "Hair style":addCustom(["Keep Original","Short","Medium","Long","Fade","Buzz Cut","Curly","Straight","Wavy","Slick Back","Side Part","Textured"]),
+      "Hair color":addCustom(["Keep Original","Black","Dark Brown","Brown","Blonde","Grey","Salt and Pepper"]),
       "Hair length":["Keep Original","Short","Medium","Long"],
       "Hair texture":["Keep Original","Straight","Wavy","Curly","Coily"]
     },
     "Glasses": {
-      "Glasses style":["Keep Original","No Glasses","Transparent","Aviator","Round","Square","Sport","Sunglasses"],
-      "Glasses color":["Keep Original","Black","White with Black Sides","Silver","Gold","Brown","Transparent"],
+      "Glasses style":addCustom(["Keep Original","No Glasses","Transparent","Aviator","Round","Square","Rectangular","Sport","Sunglasses"]),
+      "Glasses color":addCustom(["Keep Original","Black","White with Black Sides","Silver","Gold","Brown","Transparent"]),
       "Lens color":["Keep Original","Clear","Black","Brown","Blue","Green"],
       "Frame thickness":["Keep Original","Thin","Medium","Thick"]
     },
     "Shirt / Top": {
-      "Shirt style":["Keep Original","T-Shirt","Polo","Dress Shirt","Gym Shirt","Hoodie","Jacket","Kurta"],
-      "Shirt color":["Keep Original","Black","White","Blue","Green","Grey","Red","Custom"],
-      "Shirt logo":["Keep Original","No Logo","Nike","Adidas","Puma","Lacoste","Custom"],
+      "Shirt style":addCustom(["Keep Original","T-Shirt","Polo","Dress Shirt","Gym Shirt","Hoodie","Jacket","Sweater","Kurta"]),
+      "Shirt color":addCustom(["Keep Original","Black","White","Blue","Green","Grey","Red","Beige","Navy"]),
+      "Shirt logo":addCustom(["Keep Original","No Logo","Nike","Adidas","Puma","Lacoste"]),
       "Shirt fit":["Keep Original","Slim","Regular","Athletic","Oversized"]
     },
     "Pants / Bottom": {
-      "Pants style":["Keep Original","Jeans","Joggers","Chinos","Formal Pants","Gym Trousers","Shorts"],
-      "Pants color":["Keep Original","Black","White","Light Blue","Dark Blue","Grey","Beige","Custom"],
-      "Pants logo":["Keep Original","No Logo","Nike","Adidas","Puma","Custom"],
+      "Pants style":addCustom(["Keep Original","Jeans","Joggers","Chinos","Formal Pants","Gym Trousers","Cargo Pants","Shorts"]),
+      "Pants color":addCustom(["Keep Original","Black","White","Light Blue","Dark Blue","Grey","Beige","Navy"]),
+      "Pants logo":addCustom(["Keep Original","No Logo","Nike","Adidas","Puma"]),
       "Pants fit":["Keep Original","Slim","Regular","Relaxed","Athletic"]
     },
     "Belt": {
       "Belt style":["Keep Original","No Belt","Leather","Casual","Formal","Canvas"],
-      "Belt color":["Keep Original","Black","Brown","Tan","White","Custom"],
+      "Belt color":addCustom(["Keep Original","Black","Brown","Tan","White"]),
       "Belt buckle":["Keep Original","Simple","Silver","Gold","Black"],
       "Belt logo":["Keep Original","No Logo","Gucci Style","LV Style","Custom"]
     },
     "Shoes": {
       "Shoes style":["Keep Original","Sneakers","Gym Shoes","Formal Shoes","Loafers","Boots","Running Shoes"],
-      "Shoes color":["Keep Original","Black","White","Grey","Blue","Brown","Custom"],
+      "Shoes color":addCustom(["Keep Original","Black","White","Grey","Blue","Brown","Beige"]),
       "Shoes logo":["Keep Original","No Logo","Nike","Adidas","Puma","New Balance","Custom"],
       "Shoe condition":["Keep Original","New","Clean","Natural Used Look"]
     },
@@ -277,7 +324,8 @@
     }
   };
 
-  let active = new Set();
+  Object.keys(schemas).forEach(category => { Object.keys(schemas[category]).forEach(label => { schemas[category][label] = addCustom(schemas[category][label]); }); });
+let active = new Set();
   let strength = "Professional";
 
   const changeCards = document.getElementById("changeCards");
@@ -301,12 +349,11 @@
         </div>
         <div class="mt-3 grid gap-3 sm:grid-cols-2">
           ${Object.entries(schemas[name]).map(([label, options]) => `
-            <label class="block">
-              <span class="mb-1 block text-xs font-semibold">${label}</span>
-              <select data-category="${name}" data-label="${label}" class="prompt-field w-full rounded-xl border border-slate-300 bg-transparent px-3 py-2.5 text-sm dark:border-slate-700">
-                ${options.map(v => `<option>${v}</option>`).join("")}
-              </select>
-            </label>`).join("")}
+            <div class="block">
+              <div class="mb-1 flex items-center gap-2"><span class="text-xs font-semibold">${label}</span><button type="button" class="field-help grid h-5 w-5 place-items-center rounded-full bg-violet-100 text-[11px] font-bold text-violet-700 dark:bg-violet-950 dark:text-violet-300" data-help-label="${label}">?</button></div>
+              <select data-category="${name}" data-label="${label}" class="prompt-field w-full rounded-xl border border-slate-300 bg-transparent px-3 py-2.5 text-sm dark:border-slate-700">${options.map(v => `<option>${v}</option>`).join("")}</select>
+              <input data-custom-for="${name}|${label}" class="custom-field mt-2 hidden w-full rounded-xl border border-violet-300 bg-violet-50 px-3 py-2.5 text-sm dark:border-violet-800 dark:bg-violet-950/30" placeholder="Write custom instruction" />
+            </div>`).join("")}
         </div>
       </section>`).join("");
     bindFieldEvents();
@@ -322,13 +369,24 @@
   }
 
   function bindFieldEvents() {
-    document.querySelectorAll(".prompt-field").forEach(el => el.addEventListener("change", generatePrompt));
+    document.querySelectorAll(".prompt-field").forEach(el => el.addEventListener("change", () => {
+    const custom = document.querySelector(`[data-custom-for="${el.dataset.category}|${el.dataset.label}"]`);
+    if (custom) custom.classList.toggle("hidden", el.value !== "Custom");
+    generatePrompt();
+  }));
+  document.querySelectorAll(".custom-field").forEach(el => el.addEventListener("input", generatePrompt));
+  document.querySelectorAll(".field-help").forEach(btn => btn.addEventListener("click", () => openFieldGuide(btn.dataset.helpLabel)));
   }
 
   function selectedChanges() {
-    return [...document.querySelectorAll(".prompt-field")]
-      .filter(el => el.value !== "Keep Original")
-      .map(el => `${el.dataset.label}: ${el.value}`);
+    return [...document.querySelectorAll(".prompt-field")].flatMap(el => {
+      if (el.value === "Keep Original") return [];
+      if (el.value === "Custom") {
+        const custom = document.querySelector(`[data-custom-for="${el.dataset.category}|${el.dataset.label}"]`);
+        return custom && custom.value.trim() ? [`${el.dataset.label}: ${custom.value.trim()}`] : [];
+      }
+      return [`${el.dataset.label}: ${el.value}`];
+    });
   }
 
   function generatePrompt() {
@@ -386,7 +444,18 @@
     setTimeout(() => toast.classList.add("opacity-0","translate-y-3"), 1400);
   }
 
-  renderChangeCards();
+  
+function openFieldGuide(label) {
+  document.getElementById("modalTitle").textContent = label;
+  document.getElementById("modalSubtitle").textContent = helpText[label] || "Understand the available choices before selecting one.";
+  const select = [...document.querySelectorAll(".prompt-field")].find(x => x.dataset.label === label);
+  const values = select ? [...select.options].map(o => o.value) : [];
+  document.getElementById("modalContent").innerHTML = `<div class="rounded-2xl bg-violet-50 p-4 text-sm leading-6 text-violet-800 dark:bg-violet-950/30 dark:text-violet-200">${helpText[label] || "This setting controls part of the final image."}</div><div class="mt-5 grid gap-3 sm:grid-cols-2">${values.map(v => `<div class="rounded-2xl border border-slate-200 p-4 dark:border-slate-700"><h3 class="font-bold">${v}</h3><p class="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">${optionDescriptions[v] || `Uses the ${v.toLowerCase()} choice for ${label.toLowerCase()}.`}</p></div>`).join("")}</div>`;
+  const modal=document.getElementById("guideModal"); modal.classList.remove("hidden"); modal.classList.add("flex");
+}
+function closeGuide(){ const modal=document.getElementById("guideModal"); modal.classList.add("hidden"); modal.classList.remove("flex"); }
+
+renderChangeCards();
   renderParameters();
   renderNegatives();
 
@@ -444,8 +513,15 @@
     URL.revokeObjectURL(a.href);
   });
 
-  generatePrompt();
+  document.getElementById("closeGuideBtn").addEventListener("click", closeGuide);
+document.getElementById("guideModal").addEventListener("click", e => { if(e.target.id === "guideModal") closeGuide(); });
+document.getElementById("openGuideBtn").addEventListener("click", () => {
+  document.getElementById("modalTitle").textContent = "Complete Feature Guide";
+  document.getElementById("modalSubtitle").textContent = "Descriptions for the main image-editing and photography controls.";
+  document.getElementById("modalContent").innerHTML = `<div class="grid gap-4 md:grid-cols-2">${Object.entries(helpText).map(([k,v]) => `<div class="rounded-2xl border border-slate-200 p-4 dark:border-slate-700"><h3 class="font-bold">${k}</h3><p class="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">${v}</p></div>`).join("")}</div>`;
+  const modal=document.getElementById("guideModal"); modal.classList.remove("hidden"); modal.classList.add("flex");
+});
+generatePrompt();
 </script>
 </body>
 </html>
-
