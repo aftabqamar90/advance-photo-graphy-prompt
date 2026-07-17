@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Advanced AI Prompt Builder</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          boxShadow: {
+            soft: "0 18px 50px rgba(15,23,42,.08)"
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    * { scrollbar-width: thin; scrollbar-color: #8b5cf6 transparent; }
+    .field-card { transition: .2s ease; }
+    .field-card:hover { transform: translateY(-1px); }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
+
+<header class="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
+  <div class="mx-auto flex max-w-[1800px] items-center justify-between gap-4 px-4 py-4 lg:px-6">
+    <div class="flex items-center gap-3">
+      <div class="grid h-11 w-11 place-items-center rounded-2xl bg-violet-600 text-xl text-white shadow-lg">✦</div>
+      <div>
+        <h1 class="text-lg font-extrabold tracking-tight sm:text-xl">Advanced AI Prompt Builder</h1>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Create professional image-editing prompts while preserving identity.</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button id="themeToggle" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold dark:border-slate-700 dark:bg-slate-900">
+        🌙 Dark
+      </button>
+      <button id="resetBtn" class="hidden rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold sm:inline-flex dark:border-slate-700">Reset All</button>
+      <button id="copyTopBtn" class="rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-lg hover:bg-violet-700">Copy Prompt</button>
+    </div>
+  </div>
+</header>
+
+<main class="mx-auto grid max-w-[1800px] gap-5 px-4 py-5 xl:grid-cols-[360px_minmax(0,1fr)_430px] lg:px-6">
+
+  <!-- LEFT -->
+  <aside class="space-y-5">
+    <section class="rounded-3xl border border-emerald-200 bg-white p-5 shadow-soft dark:border-emerald-900/60 dark:bg-slate-900">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-[.18em] text-emerald-600">1. Identity Protection</p>
+          <h2 class="mt-1 text-lg font-bold">Always enabled</h2>
+        </div>
+        <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">Locked</span>
+      </div>
+      <div class="mt-4 grid grid-cols-2 gap-2 text-xs">
+        <span>✓ Same face</span><span>✓ No beautifying</span>
+        <span>✓ Same body</span><span>✓ No slimming</span>
+        <span>✓ Same skin tone</span><span>✓ Same height</span>
+        <span>✓ Same age</span><span>✓ Same ethnicity</span>
+        <span>✓ Same proportions</span><span>✓ Same marks/tattoos</span>
+      </div>
+    </section>
+
+    <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+      <p class="text-xs font-bold uppercase tracking-[.18em] text-violet-600">2. What do you want to change?</p>
+      <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Everything is optional. Unselected items remain original.</p>
+
+      <div id="changeCards" class="mt-4 grid grid-cols-3 gap-3">
+        <!-- injected -->
+      </div>
+
+      <div class="mt-4 rounded-2xl bg-violet-50 p-4 text-xs leading-5 text-violet-700 dark:bg-violet-950/40 dark:text-violet-300">
+        Select only the changes you need. All other visual details remain exactly the same.
+      </div>
+    </section>
+
+    <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-[.18em] text-violet-600">Quick Presets</p>
+          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Optional one-click starting points</p>
+        </div>
+      </div>
+      <div class="mt-4 grid grid-cols-2 gap-3">
+        <button class="preset rounded-2xl border border-slate-200 p-3 text-left text-sm font-semibold hover:border-violet-400 dark:border-slate-700" data-preset="gym">🏋️ Professional Gym</button>
+        <button class="preset rounded-2xl border border-slate-200 p-3 text-left text-sm font-semibold hover:border-violet-400 dark:border-slate-700" data-preset="italian">🧥 Italian Fashion</button>
+        <button class="preset rounded-2xl border border-slate-200 p-3 text-left text-sm font-semibold hover:border-violet-400 dark:border-slate-700" data-preset="luxury">🏨 Luxury Portrait</button>
+        <button class="preset rounded-2xl border border-slate-200 p-3 text-left text-sm font-semibold hover:border-violet-400 dark:border-slate-700" data-preset="outdoor">🌿 Casual Outdoor</button>
+      </div>
+    </section>
+  </aside>
+
+  <!-- CENTER -->
+  <section class="space-y-5">
+    <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+      <p class="text-xs font-bold uppercase tracking-[.18em] text-violet-600">3. Change Parameters</p>
+      <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Every dropdown defaults to “Keep Original.”</p>
+      <div id="parameterGrid" class="mt-5 grid gap-4 md:grid-cols-2">
+        <!-- injected -->
+      </div>
+    </section>
+
+    <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+      <p class="text-xs font-bold uppercase tracking-[.18em] text-violet-600">4. Photography Settings</p>
+      <div class="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div class="field-card rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
+          <label class="text-sm font-bold">Photography Style</label>
+          <select data-label="Photography style" class="prompt-field mt-2 w-full rounded-xl border border-slate-300 bg-transparent px-3 py-2.5 text-sm dark:border-slate-700">
+            <option>Keep Original</option><option>Professional Photography</option><option>Fashion Editorial</option><option>Fitness Photography</option><option>Luxury Portrait</option><option>Instagram Lifestyle</option>
+          </select>
+        </div>
+        <div class="field-card rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
+          <label class="text-sm font-bold">Camera Angle</label>
+          <select data-label="Camera angle" class="prompt-field mt-2 w-full rounded-xl border border-slate-300 bg-transparent px-3 py-2.5 text-sm dark:border-slate-700">
+            <option>Keep Original</option><option>Eye Level</option><option>Low Angle</option><option>High Angle</option><option>Close-up</option><option>Half Body</option><option>Full Body</option><option>Wide Shot</option>
+          </select>
+        </div>
+        <div class="field-card rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
+          <label class="text-sm font-bold">Lens</label>
+          <select data-label="Lens" class="prompt-field mt-2 w-full rounded-xl border border-slate-300 bg-transparent px-3 py-2.5 text-sm dark:border-slate-700">
+            <option>Keep Original</option><option>35mm</option><option>50mm</option><option>85mm Portrait Lens</option><option>Wide Angle</option>
+          </select>
+        </div>
+        <div class="field-card rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
+          <label class="text-sm font-bold">Lighting</label>
+          <select data-label="Lighting" class="prompt-field mt-2 w-full rounded-xl border border-slate-300 bg-transparent px-3 py-2.5 text-sm dark:border-slate-700">
+            <option>Keep Original</option><option>Soft Natural Light</option><option>Golden Hour</option><option>Studio Lighting</option><option>Cinematic Lighting</option><option>Moody Night Lighting</option>
+          </select>
+        </div>
+        <div class="field-card rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
+          <label class="text-sm font-bold">Quality</label>
+          <select data-label="Quality" class="prompt-field mt-2 w-full rounded-xl border border-slate-300 bg-transparent px-3 py-2.5 text-sm dark:border-slate-700">
+            <option>Keep Original</option><option>4K</option><option>8K Ultra HD</option><option>DSLR Quality</option><option>RAW Look</option><option>Ultra Realistic</option>
+          </select>
+        </div>
+        <div class="field-card rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
+          <label class="text-sm font-bold">Color Theme</label>
+          <select data-label="Color theme" class="prompt-field mt-2 w-full rounded-xl border border-slate-300 bg-transparent px-3 py-2.5 text-sm dark:border-slate-700">
+            <option>Keep Original</option><option>Natural Colors</option><option>Warm</option><option>Cool</option><option>Muted</option><option>High Contrast</option>
+          </select>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <!-- RIGHT -->
+  <aside class="space-y-5">
+    <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+      <div class="flex items-center justify-between gap-3">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-[.18em] text-violet-600">5. Generated Advanced Prompt</p>
+          <h2 class="mt-1 text-lg font-bold">Live Preview</h2>
+        </div>
+        <span id="wordCount" class="rounded-full bg-violet-100 px-3 py-1 text-xs font-bold text-violet-700 dark:bg-violet-950 dark:text-violet-300">0 words</span>
+      </div>
+
+      <textarea id="promptOutput" rows="22" readonly class="mt-4 w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-7 outline-none dark:border-slate-700 dark:bg-slate-950"></textarea>
+
+      <div class="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
+        <span class="rounded-xl bg-emerald-50 px-2 py-2 font-semibold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">Identity Protected</span>
+        <span id="changeCount" class="rounded-xl bg-violet-50 px-2 py-2 font-semibold text-violet-700 dark:bg-violet-950/40 dark:text-violet-300">0 Changes</span>
+        <span class="rounded-xl bg-slate-100 px-2 py-2 font-semibold dark:bg-slate-800">Everything Optional</span>
+      </div>
+
+      <div class="mt-4 grid grid-cols-3 gap-2">
+        <button id="copyBtn" class="rounded-xl bg-violet-600 px-3 py-2.5 text-sm font-semibold text-white hover:bg-violet-700">Copy</button>
+        <button id="downloadBtn" class="rounded-xl border border-slate-300 px-3 py-2.5 text-sm font-semibold dark:border-slate-700">Download .txt</button>
+        <button id="clearBtn" class="rounded-xl border border-rose-200 px-3 py-2.5 text-sm font-semibold text-rose-600 dark:border-rose-900">Clear</button>
+      </div>
+    </section>
+
+    <section class="rounded-3xl border border-rose-200 bg-white p-5 shadow-soft dark:border-rose-900/60 dark:bg-slate-900">
+      <p class="text-xs font-bold uppercase tracking-[.18em] text-rose-600">6. Negative Prompt</p>
+      <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Optional safeguards</p>
+      <div id="negativeGrid" class="mt-4 grid grid-cols-2 gap-2 text-sm"></div>
+      <input id="customNegative" class="mt-3 w-full rounded-xl border border-slate-300 bg-transparent px-3 py-2.5 text-sm dark:border-slate-700" placeholder="Add custom negative prompt (optional)" />
+    </section>
+
+    <section class="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+      <p class="text-xs font-bold uppercase tracking-[.18em] text-violet-600">7. Prompt Strength</p>
+      <div class="mt-4 grid grid-cols-4 gap-2">
+        <button class="strength rounded-xl border border-slate-300 px-2 py-2 text-xs font-semibold dark:border-slate-700" data-strength="Basic">Basic</button>
+        <button class="strength rounded-xl border border-slate-300 px-2 py-2 text-xs font-semibold dark:border-slate-700" data-strength="Detailed">Detailed</button>
+        <button class="strength rounded-xl bg-violet-600 px-2 py-2 text-xs font-semibold text-white" data-strength="Professional">Professional</button>
+        <button class="strength rounded-xl border border-slate-300 px-2 py-2 text-xs font-semibold dark:border-slate-700" data-strength="Extreme">Extreme</button>
+      </div>
+    </section>
+  </aside>
+</main>
+
+<div id="toast" class="fixed bottom-5 right-5 translate-y-3 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white opacity-0 shadow-xl transition dark:bg-white dark:text-slate-900">Prompt copied</div>
+
+<script>
+  const categories = [
+    ["Hair","💇"],["Glasses","👓"],["Shirt / Top","👕"],["Pants / Bottom","👖"],
+    ["Belt","🪢"],["Shoes","👟"],["Background","🌆"],["Pose","🧍"],
+    ["Expression","🙂"],["Accessories","⌚"],["Body","💪"],["Other Details","⚙️"]
+  ];
+
+  const schemas = {
+    "Hair": {
+      "Hair style":["Keep Original","Short","Medium","Long","Fade","Curly","Straight","Wavy","Slick Back"],
+      "Hair color":["Keep Original","Black","Dark Brown","Brown","Blonde","Grey","Custom"],
+      "Hair length":["Keep Original","Short","Medium","Long"],
+      "Hair texture":["Keep Original","Straight","Wavy","Curly","Coily"]
+    },
+    "Glasses": {
+      "Glasses style":["Keep Original","No Glasses","Transparent","Aviator","Round","Square","Sport","Sunglasses"],
+      "Glasses color":["Keep Original","Black","White with Black Sides","Silver","Gold","Brown","Transparent"],
+      "Lens color":["Keep Original","Clear","Black","Brown","Blue","Green"],
+      "Frame thickness":["Keep Original","Thin","Medium","Thick"]
+    },
+    "Shirt / Top": {
+      "Shirt style":["Keep Original","T-Shirt","Polo","Dress Shirt","Gym Shirt","Hoodie","Jacket","Kurta"],
+      "Shirt color":["Keep Original","Black","White","Blue","Green","Grey","Red","Custom"],
+      "Shirt logo":["Keep Original","No Logo","Nike","Adidas","Puma","Lacoste","Custom"],
+      "Shirt fit":["Keep Original","Slim","Regular","Athletic","Oversized"]
+    },
+    "Pants / Bottom": {
+      "Pants style":["Keep Original","Jeans","Joggers","Chinos","Formal Pants","Gym Trousers","Shorts"],
+      "Pants color":["Keep Original","Black","White","Light Blue","Dark Blue","Grey","Beige","Custom"],
+      "Pants logo":["Keep Original","No Logo","Nike","Adidas","Puma","Custom"],
+      "Pants fit":["Keep Original","Slim","Regular","Relaxed","Athletic"]
+    },
+    "Belt": {
+      "Belt style":["Keep Original","No Belt","Leather","Casual","Formal","Canvas"],
+      "Belt color":["Keep Original","Black","Brown","Tan","White","Custom"],
+      "Belt buckle":["Keep Original","Simple","Silver","Gold","Black"],
+      "Belt logo":["Keep Original","No Logo","Gucci Style","LV Style","Custom"]
+    },
+    "Shoes": {
+      "Shoes style":["Keep Original","Sneakers","Gym Shoes","Formal Shoes","Loafers","Boots","Running Shoes"],
+      "Shoes color":["Keep Original","Black","White","Grey","Blue","Brown","Custom"],
+      "Shoes logo":["Keep Original","No Logo","Nike","Adidas","Puma","New Balance","Custom"],
+      "Shoe condition":["Keep Original","New","Clean","Natural Used Look"]
+    },
+    "Background": {
+      "Background":["Keep Original","Modern Gym","Beach","Luxury Hotel","Cafe","Street","Office","Mountain","Airport","Luxury Car","Studio"],
+      "Background mood":["Keep Original","Clean","Luxury","Natural","Cinematic","Minimal"],
+      "Background blur":["Keep Original","No Blur","Soft Blur","Strong Blur"],
+      "Environment time":["Keep Original","Day","Evening","Night","Golden Hour"]
+    },
+    "Pose": {
+      "Pose":["Keep Original","Standing","Walking","Sitting","Hands in Pockets","Looking Sideways","Leaning"],
+      "Body direction":["Keep Original","Front","Three Quarter","Side"],
+      "Hand position":["Keep Original","Natural","In Pockets","Crossed","Holding Object"],
+      "Posture":["Keep Original","Relaxed","Confident","Athletic"]
+    },
+    "Expression": {
+      "Expression":["Keep Original","Natural","Smile","Serious","Confident","Relaxed","Thinking"],
+      "Eye direction":["Keep Original","Camera","Sideways","Down","Up"],
+      "Mouth":["Keep Original","Closed","Slight Smile","Natural Smile"],
+      "Face mood":["Keep Original","Calm","Bold","Friendly","Focused"]
+    },
+    "Accessories": {
+      "Watch":["Keep Original","No Watch","Fitness Watch","Luxury Watch","Smart Watch"],
+      "Neck chain":["Keep Original","No Chain","Thin Chain","Silver Chain","Gold Chain"],
+      "Bracelet":["Keep Original","No Bracelet","Leather","Metal","Fitness Band"],
+      "Hat / Cap":["Keep Original","No Hat","Cap","Beanie","Formal Hat"]
+    },
+    "Body": {
+      "Body adjustment":["Keep Original","Reduce Belly Slightly","Slightly Leaner","Mild Muscle Definition","Athletic","Visible Abs"],
+      "Muscle definition":["Keep Original","Natural","Mild","Medium"],
+      "Body fat":["Keep Original","No Change","Reduce Slightly"],
+      "Veins":["Keep Original","No Extra Veins","Subtle","Moderate"]
+    },
+    "Other Details": {
+      "Skin texture":["Keep Original","Natural","Detailed","No Retouching"],
+      "Image realism":["Keep Original","Realistic","Ultra Realistic","Documentary"],
+      "Additional instruction":["Keep Original","Preserve all unselected details","No AI look","Custom"],
+      "Crop":["Keep Original","Portrait 3:4","Square 1:1","Landscape 16:9","Full Body"]
+    }
+  };
+
+  let active = new Set();
+  let strength = "Professional";
+
+  const changeCards = document.getElementById("changeCards");
+  const parameterGrid = document.getElementById("parameterGrid");
+  const promptOutput = document.getElementById("promptOutput");
+  const negativeItems = ["No AI look","No plastic skin","No extra fingers","No extra arms","No distorted face","No duplicate body","No watermark","No text","No blur","No artifacts","No oversaturated colors","No unrealistic muscles"];
+
+  function renderChangeCards() {
+    changeCards.innerHTML = categories.map(([name,icon]) => `
+      <button data-category="${name}" class="category-btn rounded-2xl border border-slate-200 p-3 text-center text-xs font-semibold transition hover:border-violet-400 dark:border-slate-700">
+        <div class="text-xl">${icon}</div><div class="mt-1">${name}</div>
+      </button>`).join("");
+  }
+
+  function renderParameters() {
+    parameterGrid.innerHTML = categories.map(([name,icon]) => `
+      <section data-panel="${name}" class="parameter-panel ${active.has(name) ? "" : "hidden"} field-card rounded-2xl border border-slate-200 p-4 dark:border-slate-700">
+        <div class="flex items-center justify-between">
+          <h3 class="font-bold text-violet-700 dark:text-violet-300">${icon} ${name}</h3>
+          <span class="text-[10px] font-bold uppercase text-slate-400">Optional</span>
+        </div>
+        <div class="mt-3 grid gap-3 sm:grid-cols-2">
+          ${Object.entries(schemas[name]).map(([label, options]) => `
+            <label class="block">
+              <span class="mb-1 block text-xs font-semibold">${label}</span>
+              <select data-category="${name}" data-label="${label}" class="prompt-field w-full rounded-xl border border-slate-300 bg-transparent px-3 py-2.5 text-sm dark:border-slate-700">
+                ${options.map(v => `<option>${v}</option>`).join("")}
+              </select>
+            </label>`).join("")}
+        </div>
+      </section>`).join("");
+    bindFieldEvents();
+  }
+
+  function renderNegatives() {
+    document.getElementById("negativeGrid").innerHTML = negativeItems.map((n,i) => `
+      <label class="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-xs dark:border-slate-700">
+        <input class="negative-check h-4 w-4 accent-violet-600" type="checkbox" value="${n}" ${i < 8 ? "checked" : ""}>
+        ${n}
+      </label>`).join("");
+    document.querySelectorAll(".negative-check").forEach(el => el.addEventListener("change", generatePrompt));
+  }
+
+  function bindFieldEvents() {
+    document.querySelectorAll(".prompt-field").forEach(el => el.addEventListener("change", generatePrompt));
+  }
+
+  function selectedChanges() {
+    return [...document.querySelectorAll(".prompt-field")]
+      .filter(el => el.value !== "Keep Original")
+      .map(el => `${el.dataset.label}: ${el.value}`);
+  }
+
+  function generatePrompt() {
+    const changes = selectedChanges();
+    const negatives = [...document.querySelectorAll(".negative-check:checked")].map(x => x.value);
+    const customNegative = document.getElementById("customNegative").value.trim();
+    if (customNegative) negatives.push(customNegative);
+
+    let text = `Create a ${strength.toLowerCase()}, highly realistic edited photograph of the same person from the uploaded reference image. Preserve the exact facial identity, face shape, skin tone, age, hairstyle, eye color, body shape, height, body proportions, ethnicity, marks, tattoos, and all unique physical characteristics. Do not beautify, slim, reshape, enlarge, or modify any feature unless explicitly selected.`;
+
+    if (changes.length) {
+      text += `\n\nApply only these requested changes:\n- ${changes.join("\n- ")}.`;
+      text += `\n\nKeep every unselected option exactly the same as the original image.`;
+    } else {
+      text += `\n\nNo optional changes are selected. Keep the entire image exactly as the original.`;
+    }
+
+    text += `\n\nMaintain natural skin texture, realistic anatomy, accurate fabric behavior, believable lighting, natural shadows, balanced color, and an authentic non-AI photographic result.`;
+
+    if (negatives.length) text += `\n\nAvoid: ${negatives.join(", ")}.`;
+
+    promptOutput.value = text;
+    document.getElementById("wordCount").textContent = `${text.trim().split(/\s+/).length} words`;
+    document.getElementById("changeCount").textContent = `${changes.length} Changes`;
+  }
+
+  function toggleCategory(name, btn) {
+    active.has(name) ? active.delete(name) : active.add(name);
+    btn.classList.toggle("border-violet-500");
+    btn.classList.toggle("bg-violet-50");
+    btn.classList.toggle("dark:bg-violet-950/40");
+    document.querySelector(`[data-panel="${name}"]`).classList.toggle("hidden", !active.has(name));
+  }
+
+  function resetAll() {
+    active.clear();
+    document.querySelectorAll(".category-btn").forEach(b => b.classList.remove("border-violet-500","bg-violet-50","dark:bg-violet-950/40"));
+    document.querySelectorAll(".parameter-panel").forEach(p => p.classList.add("hidden"));
+    document.querySelectorAll(".prompt-field").forEach(f => f.selectedIndex = 0);
+    document.querySelectorAll(".negative-check").forEach((c,i) => c.checked = i < 8);
+    document.getElementById("customNegative").value = "";
+    strength = "Professional";
+    document.querySelectorAll(".strength").forEach(b => {
+      const on = b.dataset.strength === strength;
+      b.classList.toggle("bg-violet-600", on);
+      b.classList.toggle("text-white", on);
+    });
+    generatePrompt();
+  }
+
+  function copyPrompt() {
+    navigator.clipboard.writeText(promptOutput.value);
+    const toast = document.getElementById("toast");
+    toast.classList.remove("opacity-0","translate-y-3");
+    setTimeout(() => toast.classList.add("opacity-0","translate-y-3"), 1400);
+  }
+
+  renderChangeCards();
+  renderParameters();
+  renderNegatives();
+
+  document.querySelectorAll(".category-btn").forEach(btn => btn.addEventListener("click", () => toggleCategory(btn.dataset.category, btn)));
+  document.querySelectorAll(".strength").forEach(btn => btn.addEventListener("click", () => {
+    strength = btn.dataset.strength;
+    document.querySelectorAll(".strength").forEach(b => {
+      const on = b === btn;
+      b.classList.toggle("bg-violet-600", on);
+      b.classList.toggle("text-white", on);
+    });
+    generatePrompt();
+  }));
+
+  document.querySelectorAll(".preset").forEach(btn => btn.addEventListener("click", () => {
+    resetAll();
+    const preset = btn.dataset.preset;
+    const activate = (...names) => names.forEach(name => {
+      active.add(name);
+      const card = document.querySelector(`[data-category="${name}"]`);
+      card.classList.add("border-violet-500","bg-violet-50","dark:bg-violet-950/40");
+      document.querySelector(`[data-panel="${name}"]`).classList.remove("hidden");
+    });
+
+    if (preset === "gym") activate("Shirt / Top","Pants / Bottom","Shoes","Background","Accessories");
+    if (preset === "italian") activate("Hair","Shirt / Top","Pants / Bottom","Belt","Shoes");
+    if (preset === "luxury") activate("Shirt / Top","Pants / Bottom","Belt","Shoes","Accessories","Background");
+    if (preset === "outdoor") activate("Shirt / Top","Pants / Bottom","Shoes","Background","Expression");
+    generatePrompt();
+  }));
+
+  document.getElementById("themeToggle").addEventListener("click", () => {
+    document.documentElement.classList.toggle("dark");
+    const dark = document.documentElement.classList.contains("dark");
+    document.getElementById("themeToggle").textContent = dark ? "☀️ Light" : "🌙 Dark";
+    localStorage.setItem("prompt-builder-theme", dark ? "dark" : "light");
+  });
+
+  if (localStorage.getItem("prompt-builder-theme") === "dark") {
+    document.documentElement.classList.add("dark");
+    document.getElementById("themeToggle").textContent = "☀️ Light";
+  }
+
+  document.getElementById("resetBtn").addEventListener("click", resetAll);
+  document.getElementById("clearBtn").addEventListener("click", resetAll);
+  document.getElementById("copyBtn").addEventListener("click", copyPrompt);
+  document.getElementById("copyTopBtn").addEventListener("click", copyPrompt);
+  document.getElementById("customNegative").addEventListener("input", generatePrompt);
+  document.getElementById("downloadBtn").addEventListener("click", () => {
+    const blob = new Blob([promptOutput.value], {type:"text/plain"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "advanced-image-prompt.txt";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  generatePrompt();
+</script>
+</body>
+</html>
+
